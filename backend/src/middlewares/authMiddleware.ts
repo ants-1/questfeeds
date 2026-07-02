@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { createReponse } from "../utils/createReponse";
+import { createResponse } from "../utils/createResponse";
 
 export interface AuthRequest extends Request {
   userId?: string | JwtPayload | undefined;
@@ -14,7 +14,7 @@ export const authenticate = (
   const header = req.headers.authorization;
 
   if (!header?.startsWith("Bearer ")) {
-    return res.status(401).json(createReponse(false, null, "Unauthorized"));
+    return res.status(401).json(createResponse(false, null, "Unauthorized"));
   }
 
   const token = header.split(" ")[1];
@@ -28,6 +28,6 @@ export const authenticate = (
 
     next();
   } catch {
-    res.status(401).json(createReponse(false, null, "Unauthorized"));
+    res.status(401).json(createResponse(false, null, "Unauthorized"));
   }
 };

@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { errorHandler } from "./middlewares/errorHandler";
+import routes from "./routes/indexRoutes";
+import { rateLimiter } from "./middlewares/rateLimiter";
 
 const app = express();
 
@@ -14,8 +16,12 @@ app.use(
 );
 app.use(helmet());
 app.use(express.json());
+app.use(rateLimiter);
 
-// Global error handler 
+// Routes
+app.use("/api/v1", routes);
+
+// Global error handler
 app.use(errorHandler);
 
 export default app;
