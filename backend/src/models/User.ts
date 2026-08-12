@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
+import bcrypt from "bcrypt";
 
 export interface IUser extends Document {
   username: string;
@@ -56,21 +57,33 @@ const userSchema = new Schema<IUser>(
     ],
 
     level: {
-        type: Number,
-        default: 1,
+      type: Number,
+      default: 1,
     },
     xp: {
-        type: Number,
-        default: 0,
+      type: Number,
+      default: 0,
     },
     totalXp: {
-        type: Number,
-        default: 0,
-    }
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
   },
 );
+
+userSchema.methods.comparePassword = async function (
+  password: string,
+): Promise<boolean> {
+  return bcrypt.compare(password, this.password);
+};
+
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+
+  this.password = await bcrypt.hash(this.password, 10);
+});
 
 export default mongoose.model<IUser>("User", userSchema);

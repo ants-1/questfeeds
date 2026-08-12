@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/errorHandler";
 import routes from "./routes/indexRoutes";
 import { rateLimiter } from "./middlewares/rateLimiter";
@@ -16,6 +17,7 @@ app.use(
 );
 app.use(helmet());
 app.use(express.json());
+app.use(cookieParser());
 app.use(rateLimiter);
 
 // Routes
