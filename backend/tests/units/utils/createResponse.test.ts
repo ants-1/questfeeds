@@ -1,4 +1,4 @@
-import { createResponse } from "../../src/utils/createResponse";
+import { createResponse } from "../../../src/utils/createResponse";
 
 describe("createResponse", () => {
   it("should return a successful response with data", () => {
