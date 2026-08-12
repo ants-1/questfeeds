@@ -11,8 +11,17 @@ const io = new Server(httpServer, {});
 
 initialiseSocket(io);
 
-connectDB();
+const startServer = async () => {
+  try {
+    await connectDB();
 
-httpServer.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}`);
-});
+    httpServer.listen(config.port, () => {
+      console.log(`Server running on port ${config.port}`);      
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
