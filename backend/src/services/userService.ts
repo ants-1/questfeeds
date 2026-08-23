@@ -8,8 +8,6 @@ const getAllUsers = async (
 ) => {
   const skip: number = (page - 1) * limit;
 
-  // validate pagination - page >= 1 | max pages
-
   const filter = search ? { username: { $regex: search, $options: "i" } } : {};
 
   const users: IUser[] | null = await User.find(filter)

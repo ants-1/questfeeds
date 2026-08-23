@@ -2,12 +2,20 @@ import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import userService from "../services/userService";
 import { createResponse } from "../utils/createResponse";
+import {
+  usersSchema,
+  userIdSchema,
+  updateUserSchema,
+  updatePasswordSchema,
+} from "../schemas/userSchema";
 
 const getAllUsers = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
-    const search = req.query.page?.toString() || "";
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+    } = await usersSchema.parseAsync(req.query);
 
     const result = await userService.getAllUsers(page, limit, search);
 
@@ -17,9 +25,9 @@ const getAllUsers = asyncHandler(
 
 const getUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
+    const { id } = await userIdSchema.parseAsync(req.params);
 
-    const result = userService.getUser(id.toString());
+    const result = userService.getUser(id);
 
     res.status(200).json(createResponse(true, result, null));
   },
@@ -27,8 +35,10 @@ const getUser = asyncHandler(
 
 const updateUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const { username, email, avatar, bio } = req.body;
+    const { id } = await userIdSchema.parseAsync(req.params);
+    const { username, email, avatar, bio } = await updateUserSchema.parseAsync(
+      req.body,
+    );
 
     const result = await userService.updateUser(
       id.toString(),
@@ -44,7 +54,8 @@ const updateUser = asyncHandler(
 
 const updateUserPassword = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id, oldPassword, newPassword } = req.body;
+    const { id, oldPassword, newPassword } =
+      await updatePasswordSchema.parseAsync(req.body);
 
     const result = await userService.updateUserPassword(
       id,

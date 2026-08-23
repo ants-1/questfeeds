@@ -2,10 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import authService from "../services/authService";
 import { createResponse } from "../utils/createResponse";
+import { registerSchema, loginSchema } from "../schemas/authSchema";
 
 const register = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { username, email, password } = req.body;
+    const { username, email, password } = await registerSchema.parseAsync(
+      req.body,
+    );
 
     const result = await authService.register(username, email, password);
 
@@ -15,7 +18,7 @@ const register = asyncHandler(
 
 const login = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { username, password } = req.body;
+    const { username, password } = await loginSchema.parseAsync(req.body);
 
     const result = await authService.login(username, password);
 
