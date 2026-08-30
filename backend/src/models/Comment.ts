@@ -39,4 +39,4 @@ const commentSchema = new Schema<IComment>(
   },
 );
 
-export const CommentModel = model<IComment>("Comment", commentSchema);
+export const Comment = model<IComment>("Comment", commentSchema);
