@@ -8,7 +8,7 @@ export interface IUser extends Document {
   avatar?: string;
   bio: string;
   followers?: Types.ObjectId[];
-  following?: Types.ObjectId[];
+  followings?: Types.ObjectId[];
 
   level: number;
   xp: number;

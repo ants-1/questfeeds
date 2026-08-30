@@ -7,7 +7,6 @@ const getAllUsers = async (
   search?: string,
 ) => {
   const skip: number = (page - 1) * limit;
-
   const filter = search ? { username: { $regex: search, $options: "i" } } : {};
 
   const users: IUser[] | null = await User.find(filter)
