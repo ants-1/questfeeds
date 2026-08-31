@@ -119,6 +119,7 @@ export function AuthProvider({
       `${API_URL}/auth/refresh`,
       {
         method: "POST",
+        credentials: "include",
       },
     );
 
@@ -146,6 +147,7 @@ export function AuthProvider({
             Authorization: `Bearer ${accessToken}`,
           }
           : undefined,
+        credentials: "include",
       });
     } finally {
       setAccessToken(null);

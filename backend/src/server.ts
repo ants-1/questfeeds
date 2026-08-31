@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import app from "./app";
 import config from "./config/serverConfig";
 import connectDB from "./config/db";
+import { connectRedis } from "./config/redis";
 import { initialiseSocket } from "./socket";
 
 const httpServer = createServer(app);
@@ -14,9 +15,10 @@ initialiseSocket(io);
 const startServer = async () => {
   try {
     await connectDB();
+    await connectRedis();
 
     httpServer.listen(config.port, () => {
-      console.log(`Server running on port ${config.port}`);      
+      console.log(`Server running on port ${config.port}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
