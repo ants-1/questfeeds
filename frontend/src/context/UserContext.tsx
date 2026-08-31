@@ -188,12 +188,11 @@ export function UserProvider({
 
     try {
       const response = await fetch(
-        `${API_URL}/users/password`,
+        `${API_URL}/users/${id}/password`,
         {
           method: "PUT",
           headers: getAuthHeaders(),
           body: JSON.stringify({
-            id,
             oldPassword,
             newPassword,
           }),

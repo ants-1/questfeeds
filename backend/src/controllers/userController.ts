@@ -27,7 +27,7 @@ const getUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = await userIdSchema.parseAsync(req.params);
 
-    const result = userService.getUser(id);
+    const result = await userService.getUser(id);
 
     res.status(200).json(createResponse(true, result, null));
   },
@@ -54,7 +54,8 @@ const updateUser = asyncHandler(
 
 const updateUserPassword = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id, oldPassword, newPassword } =
+    const { id } = await userIdSchema.parseAsync(req.params);
+    const { oldPassword, newPassword } =
       await updatePasswordSchema.parseAsync(req.body);
 
     const result = await userService.updateUserPassword(

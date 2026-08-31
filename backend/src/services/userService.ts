@@ -46,34 +46,44 @@ const updateUser = async (
   avatar?: string,
   bio?: string,
 ) => {
-  const user: IUser | null = await User.findById(id);
+  const user = await User.findById(id);
 
   if (!user) {
     throw new AppError("User not found", 404);
   }
 
-  // update user
-  const updatedUser = await User.findByIdAndUpdate(id, {
-    username,
-    email,
-    avatar,
-    bio,
-  }).select("-password");
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    {
+      username,
+      email,
+      avatar,
+      bio,
+    },
+    {
+      returnDocument: "after",
+      runValidators: true,
+    },
+  ).select("-password");
 
   return {
     message: "User successfully updated",
-    user: updatedUser
+    user: updatedUser,
   };
 };
 
-const updateUserPassword = async (id: string, oldPassword: string, newPassword: string) => {
-  const user: IUser | null = await User.findById(id);
+const updateUserPassword = async (
+  id: string,
+  oldPassword: string,
+  newPassword: string,
+) => {
+  const user: IUser | null = await User.findById(id).select("+password");
 
   if (!user) {
     throw new AppError("User not found", 404);
   }
 
-  const isValid = user.comparePassword(oldPassword);
+  const isValid = await user.comparePassword(oldPassword);
 
   if (!isValid) {
     throw new AppError("Passwords do not match", 401);
@@ -84,8 +94,8 @@ const updateUserPassword = async (id: string, oldPassword: string, newPassword: 
   await user.save();
 
   return {
-    message: "User's password sucessfully updated"
-  }
+    message: "User's password sucessfully updated",
+  };
 };
 
 export default { getAllUsers, getUser, updateUser, updateUserPassword };

@@ -21,7 +21,6 @@ export const updateUserSchema = z.object({
 });
 
 export const updatePasswordSchema = z.object({
-  id: z.string(),
-  oldPassword: z.string().min(6, "Old password must be 6 characters long"),
-  newPassword: z.string().min(6, "New password must be 6 characters long"),
+  oldPassword: z.string().min(8, "Old password must be 8 characters long"),
+  newPassword: z.string().min(8, "New password must be 8 characters long"),
 });

@@ -36,7 +36,7 @@ const userSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true,
-      minLength: 6,
+      minLength: 8,
       select: false,
     },
     avatar: {
