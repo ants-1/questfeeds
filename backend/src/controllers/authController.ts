@@ -76,7 +76,13 @@ const refresh = asyncHandler(
 
     res
       .status(200)
-      .json(createResponse(true, { token: result.newAccessToken }, null));
+      .json(
+        createResponse(
+          true,
+          { token: result.newAccessToken, user: result.user },
+          null,
+        ),
+      );
   },
 );
 

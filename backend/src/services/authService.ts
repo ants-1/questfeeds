@@ -136,6 +136,7 @@ const refresh = async (refreshToken: any) => {
   return {
     newRefreshToken,
     newAccessToken,
+    user,
   };
 };
 
