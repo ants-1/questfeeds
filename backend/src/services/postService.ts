@@ -224,7 +224,7 @@ const deletePost = async (id: string, author: string) => {
     throw new AppError("Post not found", 404);
   }
 
-  if (post.author.toString() == author) {
+  if (post.author.toString() !== author) {
     throw new AppError(
       "Unable to delete post. You are not the author of the post",
       403,

@@ -40,7 +40,7 @@ const getFeedPosts = asyncHandler(
       page = 1,
       limit = 10,
       search = "",
-    } = await feedPostsSchema.parseAsync(req.body);
+    } = await feedPostsSchema.parseAsync(req.query);
 
     const result = await postService.getFeedPosts(id, page, limit, search);
 

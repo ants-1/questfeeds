@@ -6,7 +6,7 @@ import {
 
 import { useAuth } from "@/hooks/useAuth";
 
-const API_URL = "http://localhost:3000/api/v1";
+import { API_URL } from "@/config/api";
 
 export interface User {
   _id: string;
