@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { usePost } from "@/hooks/usePost";
 import { useComment } from "@/hooks/useComment";
+import { useReaction } from "@/hooks/useReaction";
 
 import type { Comment } from "@/context/CommentContext";
 
@@ -49,6 +50,14 @@ export default function PostDetails() {
     clearError: clearCommentError,
   } = useComment();
 
+  const {
+    toggleLike,
+    toggleDislike,
+    isLoading: isReactionLoading,
+    error: reactionError,
+    clearError: clearReactionError,
+  } = useReaction();
+
   const [post, setPost] = useState<
     Awaited<ReturnType<typeof getPost>> | null
   >(null);
@@ -72,6 +81,7 @@ export default function PostDetails() {
     const loadPost = async () => {
       clearPostError();
       clearCommentError();
+      clearReactionError();
 
       try {
         const data = await getPost(id);
@@ -87,7 +97,100 @@ export default function PostDetails() {
     getPost,
     clearPostError,
     clearCommentError,
+    clearReactionError,
   ]);
+
+  const handleLike = async () => {
+    if (!post || !user?._id) return;
+
+    try {
+      const result = await toggleLike(post._id);
+
+      setPost((currentPost) => {
+        if (!currentPost) return currentPost;
+
+        const userId = user._id;
+
+        if (result.liked) {
+          const alreadyLiked = currentPost.likes.some(
+            (like) => like._id === userId,
+          );
+
+          return {
+            ...currentPost,
+            likes: alreadyLiked
+              ? currentPost.likes
+              : [
+                  ...currentPost.likes,
+                  {
+                    _id: userId,
+                    username: user.username,
+                    avatar: user.avatar,
+                  },
+                ],
+            dislikes: currentPost.dislikes.filter(
+              (dislike) => dislike._id !== userId,
+            ),
+          };
+        }
+
+        return {
+          ...currentPost,
+          likes: currentPost.likes.filter(
+            (like) => like._id !== userId,
+          ),
+        };
+      });
+    } catch {
+      // Error is handled by ReactionContext.
+    }
+  };
+
+  const handleDislike = async () => {
+    if (!post || !user?._id) return;
+
+    try {
+      const result = await toggleDislike(post._id);
+
+      setPost((currentPost) => {
+        if (!currentPost) return currentPost;
+
+        const userId = user._id;
+
+        if (result.disliked) {
+          const alreadyDisliked = currentPost.dislikes.some(
+            (dislike) => dislike._id === userId,
+          );
+
+          return {
+            ...currentPost,
+            dislikes: alreadyDisliked
+              ? currentPost.dislikes
+              : [
+                  ...currentPost.dislikes,
+                  {
+                    _id: userId,
+                    username: user.username,
+                    avatar: user.avatar,
+                  },
+                ],
+            likes: currentPost.likes.filter(
+              (like) => like._id !== userId,
+            ),
+          };
+        }
+
+        return {
+          ...currentPost,
+          dislikes: currentPost.dislikes.filter(
+            (dislike) => dislike._id !== userId,
+          ),
+        };
+      });
+    } catch {
+      // Error is handled by ReactionContext.
+    }
+  };
 
   const handleDeletePost = async () => {
     if (!post || !user?._id) return;
@@ -375,6 +478,8 @@ export default function PostDetails() {
                   hasLiked ? "default" : "outline"
                 }
                 size="sm"
+                disabled={isReactionLoading}
+                onClick={handleLike}
               >
                 <ThumbsUp />
                 {post.likes.length}
@@ -386,6 +491,8 @@ export default function PostDetails() {
                   hasDisliked ? "default" : "outline"
                 }
                 size="sm"
+                disabled={isReactionLoading}
+                onClick={handleDislike}
               >
                 <ThumbsDown />
                 {post.dislikes.length}
@@ -398,6 +505,12 @@ export default function PostDetails() {
                   : "comments"}
               </span>
             </div>
+
+            {reactionError && (
+              <p className="text-sm text-destructive">
+                {reactionError}
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -502,10 +615,11 @@ export default function PostDetails() {
                           commentItem._id ??
                           index
                         }
-                        className={`relative rounded-lg border p-4 ${isMenuOpen
+                        className={`relative rounded-lg border p-4 ${
+                          isMenuOpen
                             ? "z-50"
                             : "z-0"
-                          }`}
+                        }`}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">

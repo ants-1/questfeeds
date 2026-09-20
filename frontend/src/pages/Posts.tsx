@@ -6,8 +6,9 @@ import {
   ThumbsUp,
 } from "lucide-react";
 
-import { useAuth } from "@/hooks/useAuth";
 import { usePost } from "@/hooks/usePost";
+import { useAuth } from "@/hooks/useAuth";
+import { useReaction } from "@/hooks/useReaction";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,29 +37,27 @@ export default function Posts() {
     clearError,
   } = usePost();
 
-  const [view, setView] =
-    useState<PostView>("all");
+  const {
+    toggleLike,
+    toggleDislike,
+    isLoading: isReactionLoading,
+    error: reactionError,
+  } = useReaction();
 
-  const [search, setSearch] =
-    useState("");
-
+  const [view, setView] = useState<PostView>("all");
+  const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] =
     useState("");
-
-  const [currentPage, setCurrentPage] =
-    useState(1);
-
-  const [openMenu, setOpenMenu] =
-    useState<string | null>(null);
-
-  const [isDeleting, setIsDeleting] =
-    useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [openMenu, setOpenMenu] = useState<string | null>(
+    null,
+  );
+  const [isDeleting, setIsDeleting] = useState<
+    string | null
+  >(null);
 
   const limit = 10;
 
-  /*
-   * Debounce search input
-   */
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -67,16 +66,10 @@ export default function Posts() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  /*
-   * Reset page when search changes
-   */
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearch]);
 
-  /*
-   * Load posts
-   */
   useEffect(() => {
     if (!user?._id) return;
 
@@ -122,12 +115,7 @@ export default function Posts() {
     clearError,
   ]);
 
-  /*
-   * Change post view
-   */
-  const handleViewChange = (
-    newView: PostView,
-  ) => {
+  const handleViewChange = (newView: PostView) => {
     if (view === newView) return;
 
     setSearch("");
@@ -137,12 +125,59 @@ export default function Posts() {
     setView(newView);
   };
 
-  /*
-   * Delete post
-   */
-  const handleDelete = async (
-    postId: string,
-  ) => {
+  const refreshPosts = async () => {
+    if (!user?._id) return;
+
+    try {
+      switch (view) {
+        case "all":
+          await getAllPosts({
+            page: currentPage,
+            limit,
+            search: debouncedSearch,
+          });
+          break;
+
+        case "popular":
+          await getPopularPosts();
+          break;
+
+        case "feed":
+          await getFeedPosts(user._id, {
+            page: currentPage,
+            limit,
+            search: debouncedSearch,
+          });
+          break;
+      }
+    } catch {
+      // Error is handled by PostContext.
+    }
+  };
+
+  const handleLike = async (postId: string) => {
+    if (!user?._id) return;
+
+    try {
+      await toggleLike(postId);
+      await refreshPosts();
+    } catch {
+      // Error is handled by ReactionContext.
+    }
+  };
+
+  const handleDislike = async (postId: string) => {
+    if (!user?._id) return;
+
+    try {
+      await toggleDislike(postId);
+      await refreshPosts();
+    } catch {
+      // Error is handled by ReactionContext.
+    }
+  };
+
+  const handleDelete = async (postId: string) => {
     if (!user?._id) return;
 
     const confirmed = window.confirm(
@@ -157,21 +192,7 @@ export default function Posts() {
       await deletePost(postId, user._id);
       setOpenMenu(null);
 
-      if (view === "all") {
-        await getAllPosts({
-          page: currentPage,
-          limit,
-          search: debouncedSearch,
-        });
-      } else if (view === "feed") {
-        await getFeedPosts(user._id, {
-          page: currentPage,
-          limit,
-          search: debouncedSearch,
-        });
-      } else {
-        await getPopularPosts();
-      }
+      await refreshPosts();
     } catch {
       // Error is handled by PostContext.
     } finally {
@@ -179,34 +200,21 @@ export default function Posts() {
     }
   };
 
-  /*
-   * Previous page
-   */
   const handlePreviousPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(
-        (page) => page - 1,
-      );
+      setCurrentPage((page) => page - 1);
     }
   };
 
-  /*
-   * Next page
-   */
   const handleNextPage = () => {
     if (
       pagination &&
       currentPage < pagination.pages
     ) {
-      setCurrentPage(
-        (page) => page + 1,
-      );
+      setCurrentPage((page) => page + 1);
     }
   };
 
-  /*
-   * Page title
-   */
   const getTitle = () => {
     switch (view) {
       case "popular":
@@ -220,9 +228,6 @@ export default function Posts() {
     }
   };
 
-  /*
-   * Page description
-   */
   const getDescription = () => {
     switch (view) {
       case "popular":
@@ -239,13 +244,9 @@ export default function Posts() {
   return (
     <div className="flex w-full justify-center px-4 py-8">
       <div className="w-full max-w-2xl space-y-6">
-
-        {/* Header */}
         <Card>
           <CardHeader>
-            <CardTitle>
-              Posts
-            </CardTitle>
+            <CardTitle>Posts</CardTitle>
 
             <CardDescription>
               {getDescription()}
@@ -253,24 +254,18 @@ export default function Posts() {
           </CardHeader>
 
           <CardContent className="space-y-4">
-
-            {/* Search */}
             <div>
               <Input
                 type="search"
                 placeholder="Search posts..."
                 value={search}
                 onChange={(event) =>
-                  setSearch(
-                    event.target.value,
-                  )
+                  setSearch(event.target.value)
                 }
               />
             </div>
 
-            {/* Post filters */}
             <div className="flex items-center gap-2">
-
               <Button
                 type="button"
                 variant={
@@ -293,9 +288,7 @@ export default function Posts() {
                     : "outline"
                 }
                 onClick={() =>
-                  handleViewChange(
-                    "popular",
-                  )
+                  handleViewChange("popular")
                 }
               >
                 Popular
@@ -309,15 +302,12 @@ export default function Posts() {
                     : "outline"
                 }
                 onClick={() =>
-                  handleViewChange(
-                    "feed",
-                  )
+                  handleViewChange("feed")
                 }
               >
                 Following
               </Button>
 
-              {/* Create Post */}
               <Link
                 to="/posts/create"
                 className="ml-auto"
@@ -326,26 +316,21 @@ export default function Posts() {
                   Create Post
                 </Button>
               </Link>
-
             </div>
           </CardContent>
         </Card>
 
-        {/* Error */}
-        {error && (
+        {(error || reactionError) && (
           <Card>
             <CardContent className="pt-6">
               <p className="text-sm text-destructive">
-                {error}
+                {error || reactionError}
               </p>
             </CardContent>
           </Card>
         )}
 
-        {/* Posts */}
         <div className="space-y-4">
-
-          {/* Heading */}
           <div>
             <h2 className="text-xl font-semibold">
               {getTitle()}
@@ -361,7 +346,6 @@ export default function Posts() {
             )}
           </div>
 
-          {/* Loading */}
           {isLoading ? (
             <Card>
               <CardContent className="py-8 text-center">
@@ -371,8 +355,6 @@ export default function Posts() {
               </CardContent>
             </Card>
           ) : posts.length === 0 ? (
-
-            /* No posts */
             <Card>
               <CardContent className="py-8 text-center">
                 <p className="text-sm text-muted-foreground">
@@ -380,10 +362,7 @@ export default function Posts() {
                 </p>
               </CardContent>
             </Card>
-
           ) : (
-
-            /* Posts list */
             posts.map((post) => {
               const authorId =
                 typeof post.author === "string"
@@ -399,11 +378,10 @@ export default function Posts() {
               const isPostDeleting =
                 isDeleting === post._id;
 
-              const hasLiked =
-                post.likes.some(
-                  (like) =>
-                    like._id === user?._id,
-                );
+              const hasLiked = post.likes.some(
+                (like) =>
+                  like._id === user?._id,
+              );
 
               const hasDisliked =
                 post.dislikes.some(
@@ -413,11 +391,8 @@ export default function Posts() {
 
               return (
                 <Card key={post._id}>
-
-                  {/* Post header */}
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
-
                       <div className="min-w-0">
                         <CardTitle>
                           {post.title}
@@ -425,13 +400,12 @@ export default function Posts() {
 
                         <CardDescription>
                           {typeof post.author ===
-                            "string"
+                          "string"
                             ? post.author
                             : `@${post.author.username}`}
                         </CardDescription>
                       </div>
 
-                      {/* Three dot menu */}
                       {isAuthor && (
                         <div className="relative shrink-0">
                           <Button
@@ -452,7 +426,6 @@ export default function Posts() {
 
                           {isMenuOpen && (
                             <div className="absolute right-0 z-10 mt-2 w-32 rounded-md border bg-background p-1 shadow-md">
-
                               <Link
                                 to={`/posts/edit/${post._id}`}
                                 className="block rounded-sm px-3 py-2 text-sm hover:bg-muted"
@@ -479,24 +452,19 @@ export default function Posts() {
                                   ? "Deleting..."
                                   : "Delete"}
                               </button>
-
                             </div>
                           )}
                         </div>
                       )}
-
                     </div>
                   </CardHeader>
 
-                  {/* Post content */}
                   <CardContent>
                     <p className="whitespace-pre-wrap">
                       {post.content}
                     </p>
 
-                    {/* Like / Dislike */}
                     <div className="mt-4 flex items-center gap-2">
-
                       <Button
                         type="button"
                         variant={
@@ -505,6 +473,12 @@ export default function Posts() {
                             : "outline"
                         }
                         size="sm"
+                        disabled={
+                          isReactionLoading
+                        }
+                        onClick={() =>
+                          handleLike(post._id)
+                        }
                       >
                         <ThumbsUp />
                         {post.likes.length}
@@ -518,6 +492,12 @@ export default function Posts() {
                             : "outline"
                         }
                         size="sm"
+                        disabled={
+                          isReactionLoading
+                        }
+                        onClick={() =>
+                          handleDislike(post._id)
+                        }
                       >
                         <ThumbsDown />
                         {post.dislikes.length}
@@ -529,10 +509,8 @@ export default function Posts() {
                           ? "comment"
                           : "comments"}
                       </span>
-
                     </div>
 
-                    {/* View Post */}
                     <div className="mt-4 border-t pt-4">
                       <Link
                         to={`/posts/${post._id}`}
@@ -546,7 +524,6 @@ export default function Posts() {
                         </Button>
                       </Link>
                     </div>
-
                   </CardContent>
                 </Card>
               );
@@ -554,12 +531,9 @@ export default function Posts() {
           )}
         </div>
 
-        {/* Pagination */}
         {pagination &&
           view !== "popular" && (
             <div className="flex items-center justify-center gap-4 border-t pt-6">
-
-              {/* Previous */}
               <Button
                 type="button"
                 variant="outline"
@@ -567,14 +541,11 @@ export default function Posts() {
                   currentPage === 1 ||
                   isLoading
                 }
-                onClick={
-                  handlePreviousPage
-                }
+                onClick={handlePreviousPage}
               >
                 Previous
               </Button>
 
-              {/* Page number */}
               <span className="text-sm font-medium">
                 Page {currentPage} of{" "}
                 {pagination.pages === 0
@@ -582,7 +553,6 @@ export default function Posts() {
                   : pagination.pages}
               </span>
 
-              {/* Next */}
               <Button
                 type="button"
                 variant="outline"
@@ -591,16 +561,12 @@ export default function Posts() {
                     pagination.pages ||
                   isLoading
                 }
-                onClick={
-                  handleNextPage
-                }
+                onClick={handleNextPage}
               >
                 Next
               </Button>
-
             </div>
           )}
-
       </div>
     </div>
   );
