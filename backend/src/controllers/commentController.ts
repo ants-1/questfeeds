@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
-import commentService from "../services/CommentService";
+import commentService from "../services/commentService";
 import { createResponse } from "../utils/createResponse";
 import {
   createCommentSchema,

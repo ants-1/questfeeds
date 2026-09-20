@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
 import { UserProvider } from "./context/UserContext";
 import { PostProvider } from "./context/PostContext";
+import { CommentProvider } from "./context/CommentContext";
 
 import AuthLayout from "./layouts/AuthLayout";
 import MainLayout from "./layouts/MainLayout";
@@ -31,58 +32,60 @@ createRoot(document.getElementById("root")!).render(
     <AuthProvider>
       <UserProvider>
         <PostProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* Public pages */}
-              <Route element={<AuthLayout />}>
-                <Route
-                  path="/login"
-                  element={<Login />}
-                />
-                <Route
-                  path="/sign-up"
-                  element={<SignUp />}
-                />
-              </Route>
-              {/* Protected pages */}
-              <Route element={<ProtectedRoute />}>
-                <Route element={<MainLayout />}>
-                  {/* Home */}
+          <CommentProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Public pages */}
+                <Route element={<AuthLayout />}>
                   <Route
-                    path="/"
-                    element={<App />}
-                  />
-                  {/* Posts */}
-                  <Route
-                    path="/posts"
-                    element={<Posts />}
+                    path="/login"
+                    element={<Login />}
                   />
                   <Route
-                    path="/posts/create"
-                    element={<CreatePost />}
-                  />
-                  <Route
-                    path="/posts/edit/:id"
-                    element={<EditPost />}
-                  />
-                  <Route
-                    path="/posts/:id"
-                    element={<PostDetails />}
-                  />
-                  {/* Users */}
-                  <Route
-                    path="/users/:id"
-                    element={<Profile />}
+                    path="/sign-up"
+                    element={<SignUp />}
                   />
                 </Route>
-              </Route>
-              {/* 404 */}
-              <Route
-                path="*"
-                element={<NotFound />}
-              />
-            </Routes>
-          </BrowserRouter>
+                {/* Protected pages */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<MainLayout />}>
+                    {/* Home */}
+                    <Route
+                      path="/"
+                      element={<App />}
+                    />
+                    {/* Posts */}
+                    <Route
+                      path="/posts"
+                      element={<Posts />}
+                    />
+                    <Route
+                      path="/posts/create"
+                      element={<CreatePost />}
+                    />
+                    <Route
+                      path="/posts/edit/:id"
+                      element={<EditPost />}
+                    />
+                    <Route
+                      path="/posts/:id"
+                      element={<PostDetails />}
+                    />
+                    {/* Users */}
+                    <Route
+                      path="/users/:id"
+                      element={<Profile />}
+                    />
+                  </Route>
+                </Route>
+                {/* 404 */}
+                <Route
+                  path="*"
+                  element={<NotFound />}
+                />
+              </Routes>
+            </BrowserRouter>
+          </CommentProvider>
         </PostProvider>
       </UserProvider>
     </AuthProvider>

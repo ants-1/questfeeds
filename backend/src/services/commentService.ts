@@ -26,12 +26,19 @@ const createComment = async (
     author,
   });
 
+  post.comments?.push(newComment._id);
+
   const levelInfo = gainExperience("comment", user);
 
   await Promise.all([post.save(), user.save()]);
 
+  const populatedComment = await Comment.findById(newComment._id).populate(
+    "author",
+    "username avatar",
+  );
+
   return {
-    comment: newComment,
+    comment: populatedComment,
     levelInfo,
     message: "Comment successfully created",
   };
@@ -76,7 +83,7 @@ const updateComment = async (
     commentId,
     { content },
     { new: true },
-  );
+  ).populate("author", "username avatar");
 
   return {
     comment: updatedComment,
