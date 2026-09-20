@@ -93,16 +93,20 @@ const getFeedPosts = async (
     throw new AppError("User not found", 404);
   }
 
-  const skip: number = (page - 1) * limit;
-  const filter = search
-    ? {
-        author: { $in: user.followings },
-        title: { $regex: search, $options: "i" },
-      }
-    : {};
+  const skip = (page - 1) * limit;
 
-  // Find all posts that of the users followings
-  const feedPosts: IPost[] | null = await Post.find(filter)
+  const filter: Record<string, unknown> = {
+    author: { $in: user.followings ?? [] },
+  };
+
+  if (search?.trim()) {
+    filter.title = {
+      $regex: search.trim(),
+      $options: "i",
+    };
+  }
+
+  const feedPosts: IPost[] = await Post.find(filter)
     .populate("author", "username avatar")
     .populate({
       path: "comments",
@@ -116,7 +120,7 @@ const getFeedPosts = async (
     .skip(skip)
     .limit(limit);
 
-  const total: number = await Post.countDocuments(filter);
+  const total = await Post.countDocuments(filter);
 
   return {
     posts: feedPosts,

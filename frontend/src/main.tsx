@@ -12,10 +12,15 @@ import App from "./App";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import Posts from "./pages/Posts";
+import PostDetails from "./pages/PostDetails";
+import CreatePost from "./pages/CreatePost";
+import EditPost from "./pages/EditPost";
 import NotFound from "./pages/NotFound";
 
 import { AuthProvider } from "./context/AuthContext";
 import { UserProvider } from "./context/UserContext";
+import { PostProvider } from "./context/PostContext";
 
 import AuthLayout from "./layouts/AuthLayout";
 import MainLayout from "./layouts/MainLayout";
@@ -25,32 +30,61 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <UserProvider>
-        <BrowserRouter>
-          <Routes>
-
-            {/* Public pages */}
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/sign-up" element={<SignUp />} />
-            </Route>
-
-            {/* Protected pages */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<App />} />
+        <PostProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public pages */}
+              <Route element={<AuthLayout />}>
                 <Route
-                  path="/users/:id"
-                  element={<Profile />}
+                  path="/login"
+                  element={<Login />}
+                />
+                <Route
+                  path="/sign-up"
+                  element={<SignUp />}
                 />
               </Route>
-            </Route>
-
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-
-          </Routes>
-        </BrowserRouter>
+              {/* Protected pages */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<MainLayout />}>
+                  {/* Home */}
+                  <Route
+                    path="/"
+                    element={<App />}
+                  />
+                  {/* Posts */}
+                  <Route
+                    path="/posts"
+                    element={<Posts />}
+                  />
+                  <Route
+                    path="/posts/:id"
+                    element={<PostDetails />}
+                  />
+                  <Route
+                    path="/posts/create"
+                    element={<CreatePost />}
+                  />
+                  <Route
+                    path="/posts/:id/edit"
+                    element={<EditPost />}
+                  />
+                  {/* Users */}
+                  <Route
+                    path="/users/:id"
+                    element={<Profile />}
+                  />
+                </Route>
+              </Route>
+              {/* 404 */}
+              <Route
+                path="*"
+                element={<NotFound />}
+              />
+            </Routes>
+          </BrowserRouter>
+        </PostProvider>
       </UserProvider>
     </AuthProvider>
-  </StrictMode >,
+  </StrictMode>,
 );

@@ -202,7 +202,7 @@ export function PostProvider({
         setIsLoading(false);
       }
     },
-    [],
+    [accessToken],
   );
 
   const getPopularPosts = useCallback(
@@ -242,7 +242,7 @@ export function PostProvider({
         setIsLoading(false);
       }
     },
-    [],
+    [accessToken],
   );
 
   const getFeedPosts = useCallback(
@@ -254,20 +254,27 @@ export function PostProvider({
       setError(null);
 
       try {
+        const searchParams = new URLSearchParams();
+
+        searchParams.set("id", id);
+        searchParams.set(
+          "page",
+          (params.page ?? 1).toString(),
+        );
+        searchParams.set(
+          "limit",
+          (params.limit ?? 10).toString(),
+        );
+
+        if (params.search) {
+          searchParams.set("search", params.search);
+        }
+
         const response = await fetch(
-          `${API_URL}/posts/feed`,
+          `${API_URL}/posts/feed?${searchParams.toString()}`,
           {
             method: "GET",
-            headers: {
-              ...getAuthHeaders(),
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              id,
-              page: params.page ?? 1,
-              limit: params.limit ?? 10,
-              search: params.search ?? "",
-            }),
+            headers: getAuthHeaders(),
           },
         );
 
@@ -295,7 +302,7 @@ export function PostProvider({
         setIsLoading(false);
       }
     },
-    [],
+    [accessToken],
   );
 
   const getPost = useCallback(
@@ -331,7 +338,7 @@ export function PostProvider({
         setIsLoading(false);
       }
     },
-    [],
+    [accessToken],
   );
 
   const createPost = useCallback(
@@ -373,7 +380,7 @@ export function PostProvider({
         setIsLoading(false);
       }
     },
-    [],
+    [accessToken],
   );
 
   const updatePost = useCallback(
@@ -416,7 +423,7 @@ export function PostProvider({
         setIsLoading(false);
       }
     },
-    [],
+    [accessToken],
   );
 
   const deletePost = useCallback(
@@ -459,7 +466,7 @@ export function PostProvider({
         setIsLoading(false);
       }
     },
-    [],
+    [accessToken],
   );
 
   const clearError = useCallback(() => {
