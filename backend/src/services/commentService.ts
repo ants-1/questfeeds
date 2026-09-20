@@ -2,6 +2,7 @@ import { Comment, IComment } from "../models/Comment";
 import { IPost, Post } from "../models/Post";
 import User, { IUser } from "../models/User";
 import { AppError } from "../utils/AppError";
+import { gainExperience } from "../utils/levelSystem";
 
 const createComment = async (
   postId: string,
@@ -25,11 +26,13 @@ const createComment = async (
     author,
   });
 
-  post.comments?.push(newComment._id);
-  await post.save();
+  const levelInfo = gainExperience("comment", user);
+
+  await Promise.all([post.save(), user.save()]);
 
   return {
     comment: newComment,
+    levelInfo,
     message: "Comment successfully created",
   };
 };

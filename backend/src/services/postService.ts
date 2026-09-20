@@ -2,6 +2,7 @@ import { redis } from "../config/redis";
 import { Post, IPost } from "../models/Post";
 import User, { IUser } from "../models/User";
 import { AppError } from "../utils/AppError";
+import { gainExperience } from "../utils/levelSystem";
 
 const getAllPosts = async (
   page: number = 1,
@@ -164,8 +165,14 @@ const createPost = async (
 
   const newPost = await Post.create({ title, content, featureImg, author });
 
+  const levelInfo = gainExperience("post", user);
+
+  await user.save();
+
   return {
     post: newPost,
+    levelInfo,
+    message: "Post successfully created",
   };
 };
 

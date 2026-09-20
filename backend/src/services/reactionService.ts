@@ -2,6 +2,7 @@ import { Post, IPost } from "../models/Post";
 import User, { IUser } from "../models/User";
 import { AppError } from "../utils/AppError";
 import { redis } from "../config/redis";
+import { gainExperience } from "../utils/levelSystem";
 
 const toggleLikes = async (postId: string, userId: string) => {
   const user: IUser | null = await User.findById(userId);
@@ -31,9 +32,12 @@ const toggleLikes = async (postId: string, userId: string) => {
 
     // Remove existing dislike
     post.dislikes = post.dislikes?.filter((id) => id.toString() !== userId);
+
+    // Award 5 XP for liking a post
+    gainExperience("like", user);
   }
 
-  await post.save();
+  await Promise.all([post.save(), user.save()]);
 
   // Update likes if popular post cache exists
   const popularPostCache = await redis.get("popular_posts");
