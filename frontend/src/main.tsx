@@ -58,16 +58,16 @@ createRoot(document.getElementById("root")!).render(
                     element={<Posts />}
                   />
                   <Route
-                    path="/posts/:id"
-                    element={<PostDetails />}
-                  />
-                  <Route
                     path="/posts/create"
                     element={<CreatePost />}
                   />
                   <Route
-                    path="/posts/:id/edit"
+                    path="/posts/edit/:id"
                     element={<EditPost />}
+                  />
+                  <Route
+                    path="/posts/:id"
+                    element={<PostDetails />}
                   />
                   {/* Users */}
                   <Route
