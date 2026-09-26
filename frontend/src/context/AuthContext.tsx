@@ -11,6 +11,7 @@ interface User {
   username: string;
   email: string;
   avatar?: string;
+  level?: string;
 }
 
 interface AuthContextType {

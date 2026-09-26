@@ -294,28 +294,32 @@ export default function Posts() {
                 Popular
               </Button>
 
-              <Button
-                type="button"
-                variant={
-                  view === "feed"
-                    ? "default"
-                    : "outline"
-                }
-                onClick={() =>
-                  handleViewChange("feed")
-                }
-              >
-                Following
-              </Button>
+              {user && (
+                <div className="w-full flex justify-between">
+                  <Button
+                    type="button"
+                    variant={
+                      view === "feed"
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() =>
+                      handleViewChange("feed")
+                    }
+                  >
+                    Following
+                  </Button>
 
-              <Link
-                to="/posts/create"
-                className="ml-auto"
-              >
-                <Button type="button">
-                  Create Post
-                </Button>
-              </Link>
+                  <Link
+                    to="/posts/create"
+                    className="ml-auto"
+                  >
+                    <Button type="button">
+                      Create Post
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -400,7 +404,7 @@ export default function Posts() {
 
                         <CardDescription>
                           {typeof post.author ===
-                          "string"
+                            "string"
                             ? post.author
                             : `@${post.author.username}`}
                         </CardDescription>
@@ -558,7 +562,7 @@ export default function Posts() {
                 variant="outline"
                 disabled={
                   currentPage >=
-                    pagination.pages ||
+                  pagination.pages ||
                   isLoading
                 }
                 onClick={handleNextPage}

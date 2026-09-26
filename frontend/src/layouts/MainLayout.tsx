@@ -1,35 +1,13 @@
-import { Link, Outlet } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { Outlet } from "react-router-dom";
+
+import Navbar from "@/components/Navbar";
 
 export default function MainLayout() {
-  const { user, logout } = useAuth();
-
   return (
     <div className="min-h-screen">
-      <header className="border-b">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="font-semibold">
-            Questfeeds
-          </Link>
+      <Navbar />
 
-          <nav className="flex items-center gap-4">
-            {user && (
-              <Link to={`/users/${user._id}`}>
-                Profile
-              </Link>
-            )}
-
-            <button
-              onClick={logout}
-              className="text-sm"
-            >
-              Logout
-            </button>
-          </nav>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-6 py-6">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <Outlet />
       </main>
     </div>

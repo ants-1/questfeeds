@@ -57,6 +57,7 @@ const login = async (username: string, password: string) => {
       _id: user._id,
       username: user.username,
       email: user.email,
+      level: user.level,
     },
     accessToken,
     refreshToken,

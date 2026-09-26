@@ -14,6 +14,7 @@ export interface User {
   email: string;
   avatar?: string;
   bio?: string;
+  level?: string;
 }
 
 interface Pagination {
