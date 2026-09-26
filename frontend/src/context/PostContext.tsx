@@ -174,7 +174,6 @@ export function PostProvider({
           `${API_URL}/posts${query ? `?${query}` : ""}`,
           {
             method: "GET",
-            headers: getAuthHeaders(),
           },
         );
 
@@ -215,7 +214,6 @@ export function PostProvider({
           `${API_URL}/posts/popular`,
           {
             method: "GET",
-            headers: getAuthHeaders(),
           },
         );
 

@@ -71,8 +71,6 @@ export default function Posts() {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    if (!user?._id) return;
-
     const loadPosts = async () => {
       clearError();
 
@@ -91,6 +89,8 @@ export default function Posts() {
             break;
 
           case "feed":
+            if (!user?._id) return;
+
             await getFeedPosts(user._id, {
               page: currentPage,
               limit,
@@ -126,8 +126,6 @@ export default function Posts() {
   };
 
   const refreshPosts = async () => {
-    if (!user?._id) return;
-
     try {
       switch (view) {
         case "all":
@@ -143,6 +141,8 @@ export default function Posts() {
           break;
 
         case "feed":
+          if (!user?._id) return;
+
           await getFeedPosts(user._id, {
             page: currentPage,
             limit,
@@ -295,7 +295,7 @@ export default function Posts() {
               </Button>
 
               {user && (
-                <div className="w-full flex justify-between">
+                <div className="flex w-full justify-between">
                   <Button
                     type="button"
                     variant={
@@ -477,9 +477,7 @@ export default function Posts() {
                             : "outline"
                         }
                         size="sm"
-                        disabled={
-                          isReactionLoading
-                        }
+                        disabled={!user || isReactionLoading}
                         onClick={() =>
                           handleLike(post._id)
                         }
@@ -497,7 +495,7 @@ export default function Posts() {
                         }
                         size="sm"
                         disabled={
-                          isReactionLoading
+                          !user || isReactionLoading
                         }
                         onClick={() =>
                           handleDislike(post._id)

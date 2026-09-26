@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useEffect,
   useState,
   type ReactNode,
@@ -112,9 +113,11 @@ export function AuthProvider({
 
     setAccessToken(data.data.token);
     setUser(data.data.user);
+
+    localStorage.setItem("hasSession", "true");
   };
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const response = await fetch(
       `${API_URL}/auth/refresh`,
       {
@@ -123,20 +126,22 @@ export function AuthProvider({
       },
     );
 
-    const data = await response.json();
-
     if (!response.ok) {
       setAccessToken(null);
       setUser(null);
 
-      throw new Error(
-        data.error || "Unable to refresh token",
-      );
+      localStorage.removeItem("hasSession");
+
+      return;
     }
+
+    const data = await response.json();
 
     setAccessToken(data.data.token);
     setUser(data.data.user);
-  };
+
+    localStorage.setItem("hasSession", "true");
+  }, []);
 
   const logout = async () => {
     try {
@@ -144,30 +149,38 @@ export function AuthProvider({
         method: "POST",
         headers: accessToken
           ? {
-            Authorization: `Bearer ${accessToken}`,
-          }
+              Authorization: `Bearer ${accessToken}`,
+            }
           : undefined,
         credentials: "include",
       });
     } finally {
       setAccessToken(null);
       setUser(null);
+
+      localStorage.removeItem("hasSession");
     }
   };
 
   useEffect(() => {
     const restoreSession = async () => {
+      const hasSession =
+        localStorage.getItem("hasSession");
+
+      if (!hasSession) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         await refresh();
-      } catch {
-        // No valid refresh token/session
       } finally {
         setIsLoading(false);
       }
     };
 
     restoreSession();
-  }, []);
+  }, [refresh]);
 
   return (
     <AuthContext.Provider
