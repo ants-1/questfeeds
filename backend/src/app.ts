@@ -11,7 +11,10 @@ const app = express();
 // Global Middlewares
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin:
+      process.env.NODE_ENV === "prod"
+        ? process.env.CLIENT_PROD_URL
+        : process.env.CLIENT_DEV_URL,
     credentials: true,
   }),
 );

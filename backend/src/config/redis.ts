@@ -1,7 +1,10 @@
 import { createClient } from "redis";
 
 export const redis = createClient({
-  url: process.env.REDIS_URL,
+  url:
+    process.env.NODE_ENV === "prod"
+      ? process.env.REDIS_PROD_URL
+      : process.env.REDIS_DEV_URL,
 });
 
 redis.on("connect", () => {
